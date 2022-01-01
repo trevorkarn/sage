@@ -780,9 +780,10 @@ class MoseleyAlgebra(UniqueRepresentation, Parent):
             basis_keys = [Set([i for (i, j) in enumerate(monom.exponents()[0]) if j]) for monom in normal_basis]
             CombinatorialFreeModule.__init__(self,
                                              VG.base_ring(),
-                                             sorted(basis_keys, key=lambda x: (len(x), x)),
+                                             basis_keys,
                                              category=VG.Bases(),
-                                             prefix='X')
+                                             prefix='X',
+                                             sorting_key=lambda x: x.to_polynomial())
 
         def __getitem__(self, indices):
             """
@@ -1330,11 +1331,11 @@ class VarchenkoGelfandAlgebra(MoseleyAlgebra):
                 sage: for covector in sorted(C.basis().keys()):
                 ....:     poly = C.to_polynomial_on_basis(covector)
                 ....:     print("{:>12}: {}".format(str(covector), N.from_polynomial(poly)))
-                (-1, -1, -1): N[] - N[0] - N[1] + N[0, 1]
-                 (-1, 1, -1): N[1] - N[2] - N[0, 1] + N[0, 2]
+                (-1, -1, -1): N[] - N[1] - N[0] + N[0, 1]
+                 (-1, 1, -1): -N[2] + N[1] + N[0, 2] - N[0, 1]
                   (-1, 1, 1): N[2] - N[0, 2]
                  (1, -1, -1): N[0] - N[0, 2]
-                  (1, -1, 1): -N[0, 1] + N[0, 2]
+                  (1, -1, 1): N[0, 2] - N[0, 1]
                    (1, 1, 1): N[0, 1]
             """
             if 0 in covector:
