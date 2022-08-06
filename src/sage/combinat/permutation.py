@@ -216,7 +216,8 @@ AUTHORS:
 - Travis Scrimshaw (2014-02-05): Made :class:`StandardPermutations_n` a
   finite Weyl group to make it more uniform with :class:`SymmetricGroup`.
   Added ability to compute the conjugacy classes.
-- Trevor K. Karn (2022-08-05): Add :meth:`Permutation.n_reduced_words`
+- Trevor K. Karn (2022-08-05): Add :meth:`Permutation.n_reduced_words` and
+  :meth:`Permutation.stanley_symmetric_function`.
 - Amrutha P, Shriya M, Divya Aggarwal (2022-08-16): Added Multimajor Index.
 
 Classes and methods
@@ -2993,35 +2994,29 @@ class Permutation(CombinatorialElement):
     def rothe_diagram(self):
         r"""
         Return the Rothe diagram of ``self``.
-
-        EXAMPLES::
-
-            sage: p = Permutation([4,2,1,3])
-            sage: D = p.rothe_diagram(); D
-            [(0, 0), (0, 1), (0, 2), (1, 0)]
-            sage: D.pp()
-            O O O .
-            O . . .
-            . . . .
-            . . . .
         """
         from sage.combinat.diagram import RotheDiagram
         return RotheDiagram(self)
 
-    def number_of_reduced_words(self):
+    def n_reduced_words(self):
         r"""
         Return the number of reduced words of ``self`` without explicitly
         computing them all.
-
-        EXAMPLES::
-
-            sage: p = Permutation([6,4,2,5,1,8,3,7])
-            sage: len(p.reduced_words()) == p.number_of_reduced_words()
-            True
         """
         Tx = self.rothe_diagram().peelable_tableaux()
 
         return sum(map(_tableau_contribution, Tx))
+
+    def stanley_symmetric_function(self):
+        r"""
+        Return the Stanley symmetric function associated to ``self``.
+        """
+
+        from sage.combinat.sf.sf import SymmetricFunctions
+        from sage.rings.rational_field import RationalField as QQ
+
+        s = SymmetricFunctions(QQ).s()
+        return sum(s[T.shape()] for T in self.rothe_diagram().peelable_tableaux())
 
     ################
     # Fixed Points #
@@ -5274,17 +5269,8 @@ class Permutation(CombinatorialElement):
 def _tableau_contribution(T):
     r"""
     Get the number of SYT of shape(``T``).
-
-    EXAMPLES::
-
-        sage: T = Tableau([[1,1,1],[2]])
-        sage: from sage.combinat.permutation import _tableau_contribution
-        sage: _tableau_contribution(T)
-        3
     """
-    from sage.combinat.tableau import StandardTableaux
     return(StandardTableaux(T.shape()).cardinality())
-
 ################################################################
 # Parent classes
 ################################################################
