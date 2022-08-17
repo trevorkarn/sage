@@ -3010,6 +3010,19 @@ class Permutation(CombinatorialElement):
     def stanley_symmetric_function(self):
         r"""
         Return the Stanley symmetric function associated to ``self``.
+
+        EXAMPLES::
+
+            sage: p = Permutation([4,5,2,3,1])
+            sage: p.stanley_symmetric_function()
+            56*m[1, 1, 1, 1, 1, 1, 1, 1] + 26*m[2, 1, 1, 1, 1, 1, 1]
+             + 12*m[2, 2, 1, 1, 1, 1] + 5*m[2, 2, 2, 1, 1] + 2*m[2, 2, 2, 2]
+             + 6*m[3, 1, 1, 1, 1, 1] + 3*m[3, 2, 1, 1, 1] + m[3, 2, 2, 1]
+             + m[3, 3, 1, 1]
+
+        .. ALGORITHM:
+
+            Uses the peelable tableaux algorithm of [RS1995]_.
         """
 
         from sage.combinat.sf.sf import SymmetricFunctions
