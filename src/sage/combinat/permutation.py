@@ -3020,16 +3020,15 @@ class Permutation(CombinatorialElement):
              + 6*m[3, 1, 1, 1, 1, 1] + 3*m[3, 2, 1, 1, 1] + m[3, 2, 2, 1]
              + m[3, 3, 1, 1]
 
-        .. ALGORITHM:
+        ALGORITHM:
 
-            Uses the peelable tableaux algorithm of [RS1995]_.
+        Uses the peelable tableaux algorithm of [RS1995]_.
         """
-
         from sage.combinat.sf.sf import SymmetricFunctions
-        from sage.rings.rational_field import RationalField as QQ
-
-        s = SymmetricFunctions(QQ).s()
-        return sum(s[T.shape()] for T in self.rothe_diagram().peelable_tableaux())
+        from sage.rings.rational_field import RationalField
+        s = SymmetricFunctions(RationalField()).schur()
+        m = SymmetricFunctions(RationalField()).monomial()
+        return m(sum(s[T.shape()] for T in self.rothe_diagram().peelable_tableaux()))
 
     ################
     # Fixed Points #
