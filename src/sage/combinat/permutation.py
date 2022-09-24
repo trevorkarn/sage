@@ -3028,9 +3028,11 @@ class Permutation(CombinatorialElement):
         Tx = self.rothe_diagram().peelable_tableaux()
         return sum(map(_tableau_contribution, Tx))
 
-    def stanley_symmetric_function(self):
+    def stanley_symmetric_function(self, basis=None):
         r"""
-        Return the Stanley symmetric function associated to ``self``.
+        Return the Stanley symmetric function associated to ``self``,
+        expressed in ``basis``. If no basis is provided the default is
+        the monomial basis.
 
         EXAMPLES::
 
@@ -3041,6 +3043,10 @@ class Permutation(CombinatorialElement):
              + 6*m[3, 1, 1, 1, 1, 1] + 3*m[3, 2, 1, 1, 1] + m[3, 2, 2, 1]
              + m[3, 3, 1, 1]
 
+            sage: s = SymmetricFunctions(QQ).schur()
+            sage: p.stanley_symmetric_function(s)
+            s[3, 3, 1, 1]
+
         ALGORITHM:
 
         Uses the peelable tableaux algorithm of [RS1995]_.
@@ -3048,8 +3054,9 @@ class Permutation(CombinatorialElement):
         from sage.combinat.sf.sf import SymmetricFunctions
         from sage.rings.rational_field import RationalField
         s = SymmetricFunctions(RationalField()).schur()
-        m = SymmetricFunctions(RationalField()).monomial()
-        return m(sum(s[T.shape()] for T in self.rothe_diagram().peelable_tableaux()))
+        if basis is None:
+            basis = SymmetricFunctions(RationalField()).monomial()
+        return basis(sum(s[T.shape()] for T in self.rothe_diagram().peelable_tableaux()))
 
     ################
     # Fixed Points #
