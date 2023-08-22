@@ -63,7 +63,81 @@ from sage.rings.ring import Algebra
 from sage.algebras.free_algebra import is_FreeAlgebra
 from sage.algebras.free_algebra_quotient_element import FreeAlgebraQuotientElement
 from sage.structure.unique_representation import UniqueRepresentation
+from sage.rings.noncommutative_ideals import Ideal_nc
 
+
+class FreeAlgebraIdeal(Ideal_nc):
+    def __init__(self, ring, gens, coerce=True, side="twosided"):
+        Ideal_nc.__init__(self, ring, gens, coerce, side)
+
+    def reduce(self, f):
+        r"""
+        Return the normal form of `f` modulo `self`.
+
+        TESTS::
+
+            sage: A.<x1,x2,x3> = FreeAlgebra(QQ)
+            sage: I = A*[x1*x2 - x2*x3]*A
+            sage: I.reduce(x1*x2*x3)
+            x1^2*x2
+        """
+        GB = self.groebner_basis()
+        rem = f
+        R = self.ring()
+        for g in GB:
+            # get the leading monomial
+            LM_G, LC_G = g.leading_item()
+
+            # convert to a Word so that we can do substring comparison
+            LM_GW = LM_G.to_word()
+
+            # while any monomial of rem has a factor of LM_G
+            while True:
+                # get leading term of the remainder
+                LM_rem, LC_rem = rem.leading_item()
+                LM_remW = LM_rem.to_word()
+
+                # if there is any substring, pick the first occurance of it
+                # if there is not, move on
+                try:
+                    i0 = next(LM_remW.factor_occurrences_iterator(LM_GW))
+                except StopIteration:
+                    break
+
+                # the left/right factors of the leading monomial after
+                # factoring out the leading monomial of g.
+                lefts = R.element_class(R, {LM_remW[:i0]: LC_rem/g.leading_coefficient()})
+                rights = R.element_class(R, {LM_remW[i0+len(LM_GW):]: 1})
+
+                # decrement the remainder
+                rem = rem - lefts*g*rights
+
+        return(rem)
+
+    def groebner_basis(self, max_size=100):
+        G = set(self.gens())
+        counter = len(G)
+        O = set()
+        import itertools
+        for f,g in itertools.combinations(G,2):
+            if o := self._overlap_element(f,g):
+                O.add(o)
+            if o := self._overlap_element(g,f):
+                O.add(o)
+        while O:
+            if counter >= max_size:
+                warnings.warn(f"Only {max_size} elements have been computed. Please increase `max_size` or proceed with caution")
+                return G
+            o = O.pop()
+            r = self.reduce_mod(o, G)
+            if r:
+                G = G.add(r)
+                counter += 1
+                try:
+                    O.update([overlap_element(g,r) for g in G] + [overlap_element(r,g) for g in G])
+                except TypeError:
+                    continue
+        return sorted(G)
 
 class FreeAlgebraQuotient(UniqueRepresentation, Algebra, object):
     @staticmethod

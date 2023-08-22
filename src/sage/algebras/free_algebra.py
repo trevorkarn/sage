@@ -447,6 +447,10 @@ class FreeAlgebra_generic(CombinatorialFreeModule, Algebra):
                                          category=cat)
         self._assign_names(indices.variable_names())
 
+    def _ideal_class_(self, n=0):
+        from sage.algebras.free_algebra_quotient import FreeAlgebraIdeal
+        return FreeAlgebraIdeal
+
     def one_basis(self):
         """
         Return the index of the basis element `1`.
