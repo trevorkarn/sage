@@ -264,7 +264,7 @@ class Curve_generic(AlgebraicScheme_subscheme):
             3
 
         Addressing issue #28336::
-        
+
             sage: C = Curve(x^2+y^2)
             sage: C.geometric_genus()
             Traceback (most recent call last):
@@ -498,13 +498,28 @@ class Curve_generic(AlgebraicScheme_subscheme):
             Traceback (most recent call last):
             ...
             NotImplementedError: Check for geometric irreducibility of curve over Complex Field with 53 bits of precision not implemented
+
+        Non-planar curves are also not yet supported::
+
+            sage: P.<x,y,z,w> = ProjectiveSpace(QQ, 3)
+            sage: C = Curve([y*(x - z), x - z, y^2 - x*w], P)
+            sage: C.is_geometrically_irreducible()
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: Check for geometric irreducibility of curve in Projective Space of dimension 3 over Rational Field not implemented
         """
         k = self.base_ring()
 
-        curve_over_closure = None
+        is_plane_curve = (self.ambient_space().dimension() == 2)
+
+        if not is_plane_curve:
+            #TODO: Implement this
+            raise NotImplementedError(f"Check for geometric irreducibility of curve in {self.ambient_space()} not implemented")
 
         # Singular's primary decomposition (used by ``is_irreducible``) does
         # not support rings such as ``QQbar[x,y]``, so factor directly.
+        curve_over_closure = None
+
         if k is QQbar:
             curve_over_closure = self
         elif isinstance(k, RationalField):
@@ -516,6 +531,7 @@ class Curve_generic(AlgebraicScheme_subscheme):
         if curve_over_closure is None:
             raise NotImplementedError(f"Check for geometric irreducibility of curve over {k} not implemented")
 
+        # this only works for plane curves
         return len(curve_over_closure.defining_polynomial().factor()) == 1
 
     def is_singular(self, P=None) -> bool:
